@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+
+# Get current directory, no matter from where the script is called
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+repo_dir="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+image_name=kinetic_gazebo_9_intel
+
+xhost +
+# Start Docker container
+docker run -it --rm \
+    --name ${image_name} \
+    -e DISPLAY \
+    -e DISPLAY=$DISPLAY \
+    -e QT_X11_NO_MITSHM=1 \
+    -v "/tmp/.X11-unix:/tmp/.X11-unix:rw" \
+    -v "/dev/input:/dev/input" \
+    -v "/etc/localtime:/etc/localtime:ro" \
+    --device=/dev/dri:/dev/dri \
+    --volume="${repo_dir}/../../../../../:/home/docker/catkin_ws:rw" \
+    --privileged \
+    --security-opt seccomp=unconfined \
+    --user=docker \
+    -w /home/docker/catkin_ws \
+    ${image_name} \
+    bash

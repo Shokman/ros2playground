@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+
+# Get current directory, no matter from where the script is called
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+repo_dir="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+# Check that the argument is one of the repos folders
+image_name=ros2nvidia
+
+XAUTH=/tmp/.docker.xauth
+if [ ! -f $XAUTH ]
+then
+    xauth_list=$(xauth nlist :0 | sed -e 's/^..../ffff/')
+    if [ ! -z "$xauth_list" ]
+    then
+        echo $xauth_list | xauth -f $XAUTH nmerge -
+    else
+        touch $XAUTH
+    fi
+    chmod a+r $XAUTH
+fi
+
+# Start Docker container
+nvidia-docker run -it --rm \
+    --name ${image_name} \
+    -e DISPLAY \
+    -e QT_X11_NO_MITSHM=1 \
+    -e XAUTHORITY=$XAUTH \
+    -v "$XAUTH:$XAUTH" \
+    -v "/tmp/.X11-unix:/tmp/.X11-unix:rw" \
+    -v "/dev/input:/dev/input" \
+    -v "/etc/localtime:/etc/localtime:ro" \
+    --volume="${repo_dir}/../../:/root/ws:rw" \
+    --privileged \
+    --runtime=nvidia \
+    --security-opt seccomp=unconfined \
+    -w /root \
+    ${image_name} \
+    bash
