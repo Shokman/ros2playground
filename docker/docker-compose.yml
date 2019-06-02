@@ -1,0 +1,30 @@
+ros2base:
+    build: ./ros2base/
+    dockerfile: "Dockerfile"
+    env_file:
+        - ./ros2base/config.env
+ros2intel:
+    build: ./ros2intel/
+    dockerfile: "Dockerfile"
+    env_file:
+        - ./ros2intel/config.env
+    volumes:
+      - "/tmp/.X11-unix:/tmp/.X11-unix:rw"
+      - "/dev/input:/dev/input"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "./../:/home/docker/catkin_ws:rw"
+    devices:
+      - "/dev/dri:/dev/dri"
+    security_opt:
+      - seccomp=unconfined
+ros2nvidia:
+    build: ros2nvidia
+    dockerfile: "Dockerfile"
+    env_file:
+        - ./ros2nvidia/config.env
+    volumes:
+      - "/tmp/.X11-unix:/tmp/.X11-unix:rw"
+      - "/dev/input:/dev/input"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "./../:/home/docker/catkin_ws:rw"
+#    runtime: nvidia  (not supported https://github.com/docker/app/issues/241)
