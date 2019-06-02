@@ -35,6 +35,11 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     python3-vcstool \
     && rm -rf /var/lib/apt/lists/*
 
+# Install ROS 2 dashing diamond
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    ros-dashing-desktop \
+    && rm -rf /var/lib/apt/lists/*
+
 # install python packages
 RUN pip3 install -U \
     argcomplete \
